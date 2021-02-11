@@ -1,28 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Ethiopia Splash Page</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css" rel="stylesheet" />
+<style>
+	body { margin: 0; padding: 0; }
+   h2,
+h3 {
+  margin: 10px;
+  font-size: 1.2em;
+}
 
-    <title>Hello!</title>
-    
-    <!-- import the webpage's stylesheet -->
-    <link rel="stylesheet" href="/style.css">
-    
-    <!-- import the webpage's javascript file -->
-    <script src="/script.js" defer></script>
-  </head>  
-  <body>
-    <h1>Hi there!</h1>
-    
-    <p>
-      I'm your cool new webpage. Made with <a href="https://glitch.com">Glitch</a>!
-    </p>
+h3 {
+  font-size: 1em;
+}
 
-    <!-- include the Glitch button to show what the webpage is about and
-          to make it easier for folks to view source and remix -->
-    <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
-    <script src="https://button.glitch.me/button.js" defer></script>
-  </body>
+p {
+  font-size: 0.85em;
+  margin: 10px;
+  text-align: left;
+}
+	#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+      
+  .legend {
+        background-color: #fff;
+        border-radius: 3px;
+        bottom: 20px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font: 18px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 10px;
+        position: absolute;
+        right: 20px;
+        z-index: 1;
+    }
+
+    .legend h4 {
+        margin: 0 0 10px;
+    }
+
+    .legend div span {
+        border-radius: 50%;
+        display: inline-block;
+        height: 10px;
+        margin-right: 5px;
+        width: 10px;
+    }
+
+  
+  /* added some Popup styling */
+
+ .mapboxgl-popup {
+      padding-bottom: 5px;
+    }
+
+.mapboxgl-popup-close-button {
+        display: none;
+      }
+
+        .mapboxgl-popup-content {
+        font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+        padding: 0;
+        width: 300px;
+              max-height: 250px;
+              overflow: auto;
+      }
+
+        .mapboxgl-popup-content-wrapper {
+          padding: 1%;
+        }
+
+        .mapboxgl-popup-content h3 {
+        background: #093746;
+        color: #fff;
+        margin: 0;
+        display: block;
+        padding: 10px;
+        border-radius: 3px 3px 0 0;
+        font-weight: 600;
+        margin-top: 0px;
+      }
+
+    .mapboxgl-popup-content h4 {
+        margin: 0;
+        display: block;
+        padding: 5px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+    .mapboxgl-container {
+      cursor: pointer;
+    }
+
+    .mapboxgl-popup-content div {
+        padding: 10px;
+      }
+
+    .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+      margin-top: 3px;
+    }
+
+    .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+      border-bottom-color: #47d61b;
+    }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="event-legend" class="legend">
+    <h4>Event Type</h4>
+    <div><span style="background-color: #c95200"></span>Battles</div>
+    <div><span style="background-color: #ffbb7a"></span>Explosions/Remote violence</div>
+    <div><span style="background-color: #a2c8ec"></span>Violence against civilians</div>
+    <div><span style="background-color: #0d657d"></span>Protests</div>
+    <div><span style="background-color: #ff7f0e"></span>Riots</div>
+</div>
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoiY2dvb3M5MSIsImEiOiJja2UwMXd2YjMzc2RxMnNtaDhrenpnZ2YwIn0.VkDyUyrumu3xotMgJNMN7w';
+// Set bounds to New York, New York
+var bounds = [
+[29.95576, 2.45653], // Southwest coordinates
+[53.85188, 15.09780]// Northeast coordinates
+];
+ 
+var map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/cgoos91/ckkwz2d6l12na17pd9j1y5f7k',
+center: [40.23987, 9.38579],
+zoom: 4.5,
+maxBounds: bounds // Sets bounds as max
+});
+  map.scrollZoom.disable();
+var hoveredStateId = null;
+
+    map.on('load', function () {
+        // addSource for a Studio tileset use 'vector' and use url with tileset ID formatted as described in https://docs.mapbox.com/mapbox-gl-js/style-spec/sources#vector 
+        //since we are using feature state for hover, need to have an 'id' field or add promoteID https://docs.mapbox.com/mapbox-gl-js/style-spec/sources#vector-promoteId
+        map.addSource('ET_Conflict_Polygon', {
+            'type': 'vector',
+            'url': 'mapbox://cgoos91.ckky493u43nn221nwe0t1kvmu-9a1vy',
+        });
+
+        // Add layer from source - if source is a tileset add parameter for 'source-layer' which is a layer name in the Tileset not the Style
+        // The feature-state dependent fill-opacity expression will render the hover effect 
+        //when a feature's hover state is set to true.
+        map.addLayer({
+            'id': 'hover-polygon',
+            'type': 'fill',
+            'source': 'ET_Conflict_Polygon',
+            'source-layer':'Ethiopia_Conflict_Polygon_10',
+            'layout': {},
+            'paint': {
+                'fill-color': '#898989',
+                'fill-outline-color': '#000000',
+                'fill-opacity': [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                      0.6,
+                     0.2
+                  ]
+            }
+        });
+
+      
+      // When the user moves their mouse over the polygon fill layer, we'll update the feature state for the feature under the mouse. 
+      //For a tileset add sourceLayer parameter, the name of the layer in the tileset.
+      map.on('mousemove', 'hover-polygon', function (e) {
+        if (e.features.length > 0) {
+          if (hoveredStateId) {
+            map.setFeatureState(
+              { source: 'ET_Conflict_Polygon', 'sourceLayer':'Ethiopia_Conflict_Polygon_10', id: hoveredStateId },
+              { hover: false }
+            );
+          }
+          hoveredStateId = e.features[0].id;
+            map.setFeatureState(
+              { source: 'ET_Conflict_Polygon', 'sourceLayer':'Ethiopia_Conflict_Polygon_10', id: hoveredStateId },
+              { hover: true }
+            );
+        }
+      });
+ 
+    // When the mouse leaves the polygon fill layer, update the feature state of the
+      // previously hovered feature.
+      map.on('mouseleave', 'hover-polygon', function () {
+        if (hoveredStateId) {
+          map.setFeatureState(
+            { source: 'ET_Conflict_Polygon', 'sourceLayer':'Ethiopia_Conflict_Polygon_10', id: hoveredStateId },
+            { hover: false }
+          );
+        }
+        hoveredStateId = null;
+        });
+
+      // This is a clickable link now, works if viewing full page in Glitch but won't actually open if viewing only in splitscreen
+        map.on('click', 'hover-polygon', function (e) {
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML('<h3>' + e.features[0].properties.Name + '</h3><p><a href="' + e.features[0].properties.URL + '" target="_blank">' + 'Read more</p>')
+                .addTo(map);
+        });  
+      
+      map.on('mouseenter', 'hover-polygon', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'hover-polygon', function () {
+            map.getCanvas().style.cursor = '';
+        });
+    });
+</script>
+
+</body>
 </html>
