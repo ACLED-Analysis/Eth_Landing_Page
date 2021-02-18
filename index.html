@@ -53,6 +53,18 @@ p {
         margin-right: 5px;
         width: 10px;
     }
+  .map-overlay {
+        background-color: #fff;
+        border-radius: 3px;
+        bottom: 500px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font: 18px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 10px;
+        position: absolute;
+        right: 20px;
+        z-index: 1;
+  }
+
     .map-overlay {
         background-color: #fff;
         border-radius: 3px;
@@ -126,6 +138,17 @@ p {
 </head>
 <body>
 <div id="map"></div>
+  <div id="instructions" class="map-overlay">
+    <div>
+      <p>
+        text
+      </p>
+    </div>
+ <div>
+  <p>
+<img src= "https://cdn.glitch.com/cc306041-423b-4017-b160-e9052815d203%2FSize%20Scale.png?v=1613668272634">
+  </p></div>
+</div>
 <div id="event-legend" class="legend">
     <h4>Event Type</h4>
     <div><span style="background-color: #c95200"></span>Battles</div>
@@ -134,8 +157,8 @@ p {
     <div><span style="background-color: #0d657d"></span>Protests</div>
     <div><span style="background-color: #ff7f0e"></span>Riots</div>
 </div>
-<div id="features" class="map-overlay">
-  <h2>US population density</h2><div id="pd"><p>Hover over a state!</p>
+<div id="size-scale" class="map-overlay">
+ <div>
   <p>
 <img src= "https://cdn.glitch.com/cc306041-423b-4017-b160-e9052815d203%2FSize%20Scale.png?v=1613668272634">
   </p></div>
