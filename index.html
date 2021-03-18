@@ -35,7 +35,7 @@ p {
         border-radius: 3px;
         bottom: 30px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        font: 18px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        font: 16px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
         padding: 10px;
         position: absolute;
         right: 20px;
@@ -43,7 +43,7 @@ p {
     }
 
     .legend h4 {
-        margin: 0 0 10px;
+        margin: 0 0 5px;
     }
 
     .legend div span {
@@ -59,7 +59,7 @@ p {
         bottom: 200px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         font: 18px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        padding: 10px;
+        padding: 0px;
         position: absolute;
         right: 20px;
         z-index: 1;
@@ -143,11 +143,10 @@ p {
   <div id="instructions" class="notes">
 
  <div>
-  <p><h4>
+  <p>
    Click on the conflict areas highlighted 
    
-    in blue for further information.
-    </h4>
+    in orange for further information.
         
   </p></div>
 </div>
@@ -162,67 +161,126 @@ p {
 <div id="size-scale" class="map-overlay">
  <div>
   <p>
-<img src= "https://cdn.glitch.com/cc306041-423b-4017-b160-e9052815d203%2FSize%20Scale.png?v=1613668272634">
+<img src= "https://cdn.glitch.com/d8437948-f19a-4a15-ae44-ca439f513e26%2FSize%20Scale4.png?v=1616000753521">
   </p></div>
 </div>
 <script>
-	mapboxgl.accessToken = 'pk.eyJ1IjoiY2dvb3M5MSIsImEiOiJja2UwMXd2YjMzc2RxMnNtaDhrenpnZ2YwIn0.VkDyUyrumu3xotMgJNMN7w';
+	mapboxgl.accessToken = 'pk.eyJ1IjoiYWNsZWQiLCJhIjoiY2pncW50MTVwMDUzNzJycWx4YXVnamh1biJ9.azwIz4TmaBWj7MFNZX8R9g';
 // Set bounds to New York, New York
 
 var map = new mapboxgl.Map({
 container: 'map',
-style: 'mapbox://styles/cgoos91/cklcfjptt3su117ledyc50ne1', 
-center: [40.23987, 9.38579],
-zoom: 5.7,
+style: 'mapbox://styles/acled/ckmfc7zkv0z4217mr5t5opk4g', 
+center: [40.23987, 9.08579],
+zoom: 5.35,
 dragPan: false,
 
 });
-  map.scrollZoom.disable();
-var hoveredStateId = null;
+  map.on('click', function(e) {
+  var features = map.queryRenderedFeatures(e.point, {
+    layers: ['ethiopia-regions-1'] // replace this with the name of the layer
+  });
 
-    map.on('load', function () {
+  if (!features.length) {
+    return;
+  }
+
+  var feature = features[0];
+
+  var popup = new mapboxgl.Popup({ offset: [0, -15] })
+    .setLngLat(feature.geometry.coordinates)
+    .setHTML('<h3>' + feature.properties.Name + '</h3><p><a href="' + feature.properties.URL + '" target="_blank">' + 'Read more</p>')
+    .addTo(map);
+    });
+  var hoveredStateId = null;
+  
+  map.scrollZoom.disable();
+  map.on('click', function(e) {
+  var features = map.queryRenderedFeatures(e.point, {
+    layers: ['ethiopia-regions-1'] // replace this with the name of the layer
+  });
+
+  if (!features.length) {
+    return;
+  }
+
+  var feature = features[0];
+
+  var popup = new mapboxgl.Popup({ offset: [0, -15] })
+    .setLngLat(feature.geometry.coordinates)
+    .setHTML('<h3>' + feature.properties.Name + '</h3><p><a href="' + feature.properties.URL + '" target="_blank">' + 'Read more</p>')
+    .addTo(map);
+    });
+  
+  var hoveredStateId = null;
+  
+  map.on('load', function () {
         // addSource for a Studio tileset use 'vector' and use url with tileset ID formatted as described in https://docs.mapbox.com/mapbox-gl-js/style-spec/sources#vector 
         //since we are using feature state for hover, need to have an 'id' field or add promoteID https://docs.mapbox.com/mapbox-gl-js/style-spec/sources#vector-promoteId
-        map.addSource('ET_Conflict_Polygon', {
+        map.addSource('Ethiopia_Conflict_Zones', {
             'type': 'vector',
-            'url': 'mapbox://cgoos91.ckky493u43nn221nwe0t1kvmu-9a1vy',
+            'url': 'mapbox://acled.2mvd11sd',
         });
 
+        map.addSource('Ethiopia_conflict_polygon', {
+            'type': 'vector',
+            'url': 'mapbox://acled.ckm5a3k5q0d2e22o2gwx39jdx-5b5b5',
+      
+        });
         // Add layer from source - if source is a tileset add parameter for 'source-layer' which is a layer name in the Tileset not the Style
         // The feature-state dependent fill-opacity expression will render the hover effect 
         //when a feature's hover state is set to true.
         map.addLayer({
             'id': 'hover-polygon',
             'type': 'fill',
-            'source': 'ET_Conflict_Polygon',
-            'source-layer':'Ethiopia_Conflict_Polygon_10',
+            'source': 'Ethiopia_Conflict_Zones',
+            'source-layer':'eth_admbnda_adm1_csa_bofed_20-6kok5f',
             'layout': {},
             'paint': {
-                'fill-color': '#0f3f6b',
+                'fill-color': '#2f82ac',
                 'fill-outline-color': '#000000',
                 'fill-opacity': [
                   'case',
                   ['boolean', ['feature-state', 'hover'], false],
-                      0.6,
-                     0.2
+                      0.1,
+                     0.0
+                  ]
+              
+            }
+          
+        });
+        map.addLayer({
+            'id': 'conflict-polygon',
+            'type': 'fill',
+            'source': 'Ethiopia_conflict_polygon',
+            'source-layer':'Ethiopia_Conflict_Zones_1',
+            'layout': {},
+            'paint': {
+                'fill-color': '#97451c',
+                'fill-outline-color': '#000000',
+                'fill-opacity': [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                      0.7,
+                     0.3
                   ]
             }
-        });
 
-      
+       });
+    
       // When the user moves their mouse over the polygon fill layer, we'll update the feature state for the feature under the mouse. 
       //For a tileset add sourceLayer parameter, the name of the layer in the tileset.
       map.on('mousemove', 'hover-polygon', function (e) {
         if (e.features.length > 0) {
           if (hoveredStateId) {
             map.setFeatureState(
-              { source: 'ET_Conflict_Polygon', 'sourceLayer':'Ethiopia_Conflict_Polygon_10', id: hoveredStateId },
+              { source: 'Ethiopia_Conflict_Zones', 'sourceLayer':'eth_admbnda_adm1_csa_bofed_20-6kok5f', id: hoveredStateId },
               { hover: false }
             );
           }
           hoveredStateId = e.features[0].id;
             map.setFeatureState(
-              { source: 'ET_Conflict_Polygon', 'sourceLayer':'Ethiopia_Conflict_Polygon_10', id: hoveredStateId },
+              { source: 'Ethiopia_Conflict_Zones', 'sourceLayer':'eth_admbnda_adm1_csa_bofed_20-6kok5f', id: hoveredStateId },
               { hover: true }
             );
         }
@@ -233,29 +291,67 @@ var hoveredStateId = null;
       map.on('mouseleave', 'hover-polygon', function () {
         if (hoveredStateId) {
           map.setFeatureState(
-            { source: 'ET_Conflict_Polygon', 'sourceLayer':'Ethiopia_Conflict_Polygon_10', id: hoveredStateId },
+            { source: 'Ethiopia_Conflict_Zones', 'sourceLayer':'eth_admbnda_adm1_csa_bofed_20-6kok5f', id: hoveredStateId },
             { hover: false }
           );
         }
         hoveredStateId = null;
         });
-
+map.on('mousemove', 'hover-polygon', function (e) {
+        if (e.features.length > 0) {
+          if (hoveredStateId) {
+            map.setFeatureState(
+              { source: 'Ethiopia_Conflict_Zones', 'sourceLayer':'eth_admbnda_adm1_csa_bofed_20-6kok5f', id: hoveredStateId },
+              { hover: false }
+            );
+          }
+          hoveredStateId = e.features[0].id;
+            map.setFeatureState(
+              { source: 'Ethiopia_Conflict_Zones', 'sourceLayer':'eth_admbnda_adm1_csa_bofed_20-6kok5f', id: hoveredStateId },
+              { hover: true }
+            );
+        }
+      });
+ 
+    // When the mouse leaves the polygon fill layer, update the feature state of the
+      // previously hovered feature.
+      map.on('mouseleave', 'hover-polygon', function () {
+        if (hoveredStateId) {
+          map.setFeatureState(
+            { source: 'Ethiopia_Conflict_Zones', 'sourceLayer':'eth_admbnda_adm1_csa_bofed_20-6kok5f', id: hoveredStateId },
+            { hover: false }
+          );
+        }
+        hoveredStateId = null;
+        });
       // This is a clickable link now, works if viewing full page in Glitch but won't actually open if viewing only in splitscreen
-        map.on('click', 'hover-polygon', function (e) {
+        map.on('click', 'conflict-polygon', function (e) {
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
                 .setHTML('<h3>' + e.features[0].properties.Name + '</h3><p><a href="' + e.features[0].properties.URL + '" target="_blank">' + 'Read more</p>')
                 .addTo(map);
         });  
-      
-      map.on('mouseenter', 'hover-polygon', function () {
+        
+        
+        map.on('mouseenter', 'conflict-polygon', function () {
             map.getCanvas().style.cursor = 'pointer';
         });
 
-        map.on('mouseleave', 'hover-polygon', function () {
+        map.on('mouseleave', 'conflict-polygon', function () {
             map.getCanvas().style.cursor = '';
+     
+        });
+    
+           map.on('mouseenter', 'ethiopia-regions-1', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        map.on('mouseleave', 'ethiopia-regions-1', function () {
+            map.getCanvas().style.cursor = '';
+     
         });
     });
+  
 </script>
 
 </body>
